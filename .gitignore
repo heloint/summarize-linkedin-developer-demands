@@ -1,0 +1,7 @@
+linkedin-parse-venv/*
+linkedin-parse-dev/*
+linkedin/*
+gecko*
+plot-output/*
+.mypy_cache/*
+__pycache__
