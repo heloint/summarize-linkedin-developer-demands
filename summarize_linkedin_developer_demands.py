@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
-
+import argparse
+import datetime
 import os
 import re
 import time
-import argparse
-import datetime
-import matplotlib.pyplot as plt #type: ignore
-
-from tqdm import tqdm
 from typing import Sequence
 
+import matplotlib.pyplot as plt  # type: ignore
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+from tqdm import tqdm
 
 
 class LinkedInOffers:
@@ -79,42 +77,38 @@ class LinkedInOffers:
 
         self.language_counter = {key: 0 for key in self.__language_synonyms}
 
-        self.framework_counter: dict[str, int] = {
-            "Node.js": 0,
-            "React": 0,
-            "jQuery": 0,
-            "Express": 0,
-            "Angular": 0,
-            "Next.js": 0,
-            "ASP.NET": 0,
-            "Vue.js": 0,
-            "WordPress": 0,
-            "ASP.NET": 0,
-            "Flask": 0,
-            "Spring": 0,
-            "Django": 0,
-            "Laravel": 0,
-            "FastAPI": 0,
-            "AngularJS": 0,
-            "Svelte": 0,
-            "Ruby": 0,
-            "NestJS": 0,
-            "Blazor": 0,
-            "Nuxt.js": 0,
-            "Symfony": 0,
-            "Deno": 0,
-            "Gatsby": 0,
-            "Fastify": 0,
-            "Phoenix": 0,
-            "Drupal": 0,
-            "CodeIgniter": 0,
-            "Solid.js": 0,
-            "Remix": 0,
-            "Elm": 0,
-            "Play": 0,
-            "Lit": 0,
-            "Qwik": 0,
+        self.__framework_synonyms = {
+            "Node.js": ["NodeJS", "Node", "Express.js"],
+            "React": ["React.js", "ReactJS"],
+            "jQuery": [],
+            "Express": ["Express.js", "Node.js Express"],
+            "Angular": ["AngularJS"],
+            "Next.js": ["NextJS"],
+            "ASP.NET": [".NET"],
+            "Vue.js": ["VueJS"],
+            "WordPress": ["WordPress", "CMS"],
+            "Flask": ["Flask"],
+            "Springboot": ["Spring Boot"],
+            "Django": ["Django"],
+            "Laravel": ["Laravel"],
+            "FastAPI": ["FastAPI"],
+            "Svelte": ["Svelte.js"],
+            "Ruby": ["Ruby on Rails", "Ruby"],
+            "NestJS": ["Nest.js"],
+            "Blazor": ["Blazor", "ASP.NET Blazor"],
+            "Nuxt.js": ["NuxtJS"],
+            "Symfony": ["Symfony"],
+            "Deno": ["Deno"],
+            "Gatsby": ["Gatsby", "Gatsby.js"],
+            "Fastify": ["Fastify"],
+            "Phoenix": ["Phoenix"],
+            "Drupal": ["Drupal", "CMS"],
+            "CodeIgniter": ["CodeIgniter"],
+            "Solid.js": ["SolidJS", "Solid.js"],
+            "Remix": ["Remix", "Remix.js"],
         }
+
+        self.framework_counter = {key: 0 for key in self.__framework_synonyms}
 
         self.__firefox_options: webdriver.FirefoxOptions | None = (
             webdriver.FirefoxOptions()
@@ -214,9 +208,14 @@ class LinkedInOffers:
     def __fetch_framework_counter(self, offer_html: str) -> None:
         offer_html = offer_html.lower()
 
-        for framework in self.framework_counter.keys():
-            if f" {framework.lower()} " in offer_html:
-                self.framework_counter[framework] += 1
+        for framework, framework_keywords in self.__framework_synonyms.items():
+            has_keyword = False
+            for keyword in framework_keywords:
+                if f" {keyword.lower()} " in offer_html:
+                    has_keyword = True
+
+            if has_keyword:
+                self.language_counter[framework] += 1
 
     def __iterate_offers(self) -> None:
         print("Starting to parse the offers ..")
